@@ -1,0 +1,30 @@
+name = 'test_app'
+key = 'abcdefg'
+root_schema_file= 'root.graphql'
+# proxy = {}
+# [proxy.starwars]
+# root_field = 'starwars'
+# endpoint = 'https://swapi-graphql.netlify.com/.netlify/functions/index'
+# schema_file = 'starwars.schema.graphql'
+# type_prefix = 'SW'
+# headers = []
+# extension_files = []
+
+# [proxy.rickmorty]
+# root_field = 'rickmorty'
+# endpoint = 'https://rickandmortyapi.com/graphql'
+# schema_file = 'rickmorty.schema.graphql'
+# type_prefix = 'RM'
+# headers = []
+# extension_files = []
+
+[proxy.bigcommerce]
+root_field = 'bigcommerce'
+endpoint = 'https://gottagofast.galaxy.lol/graphql'
+schema_file = 'bigcommerce.schema.graphql'
+type_prefix = 'BC'
+extension_files = []
+
+[[proxy.bigcommerce.headers]]
+name = 'authorization'
+value = 'Bearer simple_f7eem7127hc4dhabcbbaxznxyqq4peq87pjq0r8s0yowf7rtwn9qe0f5pajnbeyg'

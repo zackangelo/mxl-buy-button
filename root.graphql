@@ -1,0 +1,18 @@
+schema {
+  query: RootObject
+}
+
+type RootObject 
+@link(proxy: "bigcommerce", field: "bigcommerce") 
+{ 
+  message: String 
+    @stringVal(expr: "testing"),
+
+  message2: String 
+    @stringVal(expr: "hello ${message}")
+}
+
+extend type BCSite 
+  @cache(srcField: "products", field: "cachedProducts", storage: "test")
+  @cache(srcField: "product", field: "fastProduct", storage: "test")
+  @cache(srcField: "settings", field: "fastSettings", storage: "test")

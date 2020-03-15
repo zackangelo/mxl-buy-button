@@ -1,0 +1,248 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+        <link href="static.css" rel="stylesheet">
+        <link href="responsive.css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+        <script>
+           var caption_mousedover = false;
+           var body_mousedover = false;
+        </script>
+        <script>
+        const pageUrl = new URL(window.location);
+        const searchParams = pageUrl.searchParams;
+
+        // Set up default params
+        let params = {
+            store_hash: "z4qvybaexo",
+            sku: null,
+            token: "simple_f7eem7127hc4dhabcbbaxznxyqq4peq87pjq0r8s0yowf7rtwn9qe0f5pajnbeyg",
+            btn_text: 'Buy Now',
+            overlay_text: 'Learn More',
+            bg_color: 'fff',
+            btn_color: '4b71fc',
+            btn_text_color: 'fff',
+            btn_bg_color: 'f6f7f9',
+            title_color: '34313f',
+            price_color: 'aeadb3',
+            font: 'Source Sans Pro',
+            action: 'checkout',
+            open_in: 'popup',
+            src: null,
+            ga_id: null
+        };
+
+        // Fill in supplied URL params
+        Object.keys(params).forEach(function (key) {
+            if (searchParams.get(key)) {
+                params[key] = searchParams.get(key);
+            }
+        });
+
+        function formatPrice(currency, value) {
+            return new Intl.NumberFormat('en-us', {style: 'currency', currency: currency}).format(value);
+        }
+        function renderPage(params, data) {
+            document.title = `${data.bigcommerce.site.fastProduct.name} (${data.bigcommerce.site.fastProduct.sku}) - Buy Button - ${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`;
+            document.body.innerHTML = `
+            <style>
+                .button {
+                    background-color:#${params.btn_color};
+                    border-color:#${params.btn_color};
+                    color:#${params.btn_text_color};
+                }
+                .card-button {
+                    opacity: 1;
+                    transition: opacity .25s ease-in-out;
+                }
+                .card-button:hover {
+                    opacity: .75;
+                }
+                .card-title {
+                    color:#${params.title_color};
+                }
+                .card-subTitle {
+                    color:#${params.title_color};
+                }
+                .card-figcaption {
+                    transition: opacity .25s ease-in-out;
+                }
+                body, h2, h3, .card-title, .button{
+                    font-family: "${params.font}", "Helvetica Neue", Arial, sans-serif;
+                }
+            </style>
+            <article class="card">
+                <a id="imagelink" rel="noopener" href="${data.bigcommerce.site.fastSettings.url.vanityUrl}${data.bigcommerce.site.fastProduct.path}" target="_blank">
+                    <figure class="card-figure">
+                        <img class="card-image" src="${data.bigcommerce.site.fastProduct.defaultImage.img1000px}"
+                             srcset="${data.bigcommerce.site.fastProduct.defaultImage.img100px} 100w, ${data.bigcommerce.site.fastProduct.defaultImage.img250px} 250w, ${data.bigcommerce.site.fastProduct.defaultImage.img500px} 500w, ${data.bigcommerce.site.fastProduct.defaultImage.img1000px} 1000w, ${data.bigcommerce.site.fastProduct.defaultImage.img1500px} 1500w"
+                             alt="${data.bigcommerce.site.fastProduct.name}">
+                        <figcaption class="card-figcaption" id="caption" data-src="${data.bigcommerce.site.fastProduct.defaultImage.img1000px}">
+                            <div class="card-figcaption-body">
+                                <span class="button card-figcaption-button hvr-pop">${params.overlay_text}</span>
+                            </div>
+                        </figcaption>
+                    </figure>
+                </a>
+                <div class="card-body">
+                    <h2 class="card-title">
+                        ${data.bigcommerce.site.fastProduct.name}
+                    </h2>
+                    <h3 class="card-subTitle" id="price-subTitle">${formatPrice(data.bigcommerce.site.fastProduct.prices.price.currencyCode, data.bigcommerce.site.fastProduct.prices.price.value)}</h3>
+                </div>
+                <footer class="card-footer">
+                    <a id="buylink" rel="noopener"
+                       class="card-button button button--primary"
+                       ${params.open_in == 'same_tab' ? `target="_top"` : `target="_blank"`}
+                       ${params.action == 'product' ? `href="${data.bigcommerce.site.fastSettings.url.vanityUrl}${data.bigcommerce.site.fastProduct.path}?sku=${data.bigcommerce.site.fastProduct.sku}"`
+                            : params.action == 'cart' ? `href="${data.bigcommerce.site.fastSettings.url.vanityUrl}/cart.php?action=add&sku=${data.bigcommerce.site.fastProduct.sku}"`
+                            : `href="${data.bigcommerce.site.fastSettings.url.vanityUrl}/cart.php?action=buy&sku=${data.bigcommerce.site.fastProduct.sku}"`
+                       }>
+                        <span class="button-name">${data.bigcommerce.site.fastProduct.name} - </span>
+                        <span class="button-buynow">${params.btn_text}</span>
+                        <span class="button-price"> - <span id="price-button">${formatPrice(data.bigcommerce.site.fastProduct.prices.price.currencyCode, data.bigcommerce.site.fastProduct.prices.price.value)}</span>
+                        </span>
+                    </a>
+                </footer>
+            </article>`;
+        }
+
+        function openBCWindow(url) {
+            if (params.open_in === 'popup') {
+              var top = (screen.height/2) - 300;
+              var left = (screen.width/2) - 200;
+              window.open(url,"bcWindow", "width=600,height=800,menubar=0,toolbar=0,status=0,top="+top+",left="+left);
+              return false;
+            } else {
+              return true;
+            }
+        }
+
+        function getProductAndSiteInfo(params) {
+            // const graphQLUrl = `https://store-${params.store_hash}.mybigcommerce.com/graphql`;
+            const graphQLUrl = `/graphql`;
+
+            return fetch(graphQLUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json',
+                       'Authorization': `Bearer ${params.token}`},
+              body: JSON.stringify({ query: `query BuyButton1dot4 {
+                  bigcommerce {
+                    site {
+                        fastProduct(sku:"${params.sku}") {
+                            ...ProductFields
+                        }
+                        fastSettings {
+                            url {
+                                vanityUrl
+                            }
+                        }
+                    }
+                  }
+                }
+
+                fragment ProductFields on BCProduct {
+                  id
+                  name
+                  sku
+                  path
+                  defaultImage {
+                    img100px: url(width: 100)
+                    img250px: url(width: 250)
+                    img500px: url(width: 500)
+                    img1000px: url(width: 1000)
+                    img1500px: url(width: 1500)
+                    altText
+                  }
+                  prices {
+                    price {
+                      value
+                      currencyCode
+                    }
+                    retailPrice {
+                      value
+                      currencyCode
+                    }
+                  }
+                }` }),
+            }).then(res => res.json()).then(res => res.data);
+        }
+
+        // Check for required parameters, throw an error if they're not found
+        if (!(params.store_hash && params.sku && params.token)) {
+            document.body.innerHTML = 'Required parameters (SKU, Store Hash, Token) not supplied';
+            throw new Error('Required parameters (SKU, Store Hash, Token) not supplied');
+        } else {
+            // We have the params we need, proceed...
+            WebFont.load({
+                google: {
+                families: [`${params.font}:400,600`]
+              }
+            });
+            // Get the product via API and render it
+            let data = {};
+            getProductAndSiteInfo(params).then(data => {
+                renderPage(params, data);
+                // Assuming success, do other things
+                if (params.ga_id) {
+                        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                        ga('create', `UA-${params.ga_id}`, 'auto', {'allowLinker': true});
+                        ga('require', 'linker');
+                        ga('linker:autoLink', [`${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`] );
+                        ga('require', 'linkid');
+                        ga('send', 'pageview');
+                }
+
+
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+                ga('create', 'UA-89810132-1', 'auto');
+                ga('require', 'linkid');
+                ga('send', 'pageview');
+
+                function trackOutboundLink(url, action) {
+                   var success = true;
+                   ga('send', 'event', `Buy Button - ${data.bigcommerce.site.fastProduct.sku} - ${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`, action, url, {
+                     'transport': 'beacon',
+                     'hitCallback': function(){success = openBCWindow(url);}
+                   });
+                   return success;
+                }
+
+                function handlebuyclick(context){
+                    return trackOutboundLink(context.href, 'Click Buy Link');
+                };
+
+                document.getElementById("buylink").onclick = function() {return handlebuyclick(this)};
+
+                document.getElementById("imagelink").onclick = function(){
+                    ga('send', 'event', `Buy Button - ${data.bigcommerce.site.fastProduct.sku} - ${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`, 'Click Image Link', this.href);
+                };
+                document.getElementById("caption").onmouseover = function(){
+                    if(!caption_mousedover) {
+                        ga('send', 'event', `Buy Button - ${data.bigcommerce.site.fastProduct.sku} - ${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`, 'Image Mouseover (Caption Displayed)', this.getAttribute('data-src'));
+                        caption_mousedover = true;
+                    }
+                };
+                document.body.onmouseover = function(){
+                    if(!body_mousedover) {
+                        ga('send', 'event', `Buy Button - ${data.bigcommerce.site.fastProduct.sku} - ${new URL(data.bigcommerce.site.fastSettings.url.vanityUrl).hostname}`, 'Mouseover');
+                        body_mousedover = true;
+                    }
+                };
+            });
+        }
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
